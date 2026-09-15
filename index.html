@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>servewise — a safe local preview server</title>
+    <meta name="description" content="A tiny, dependency-free local web server for previewing built static sites: caching disabled, first-free-port selection, an identity endpoint, and version self-checking.">
+    <meta property="og:title" content="servewise — a safe local preview server">
+    <meta property="og:description" content="python -m http.server with the four things that bite you during a real preview fixed: no-cache, safe port selection, an identity endpoint, and version self-checking.">
+    <meta property="og:url" content="https://abdelhaleemahmed.github.io/servewise/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <link rel="icon" href="images/favicon.png">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #2b2b3a; line-height: 1.65; background: #ecedf7; padding: 40px 24px;
+        }
+        .app {
+            max-width: 940px; margin: 0 auto; background: #fff;
+            border-radius: 26px; overflow: hidden;
+            box-shadow: 0 26px 70px rgba(45,33,90,.16), 0 6px 18px rgba(45,33,90,.06);
+        }
+        .section { padding: 56px 52px; }
+        .bg-hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; text-align: center; }
+        .bg-dark { background: #0d1117; color: #e6edf3; }
+        .bg-light { background: #f5f6fb; }
+        .icon { width: 92px; height: 92px; border-radius: 22px; margin: 0 auto 22px; display: block; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+        h1 { font-size: 2.7rem; letter-spacing: -.5px; margin-bottom: 8px; }
+        .tag { font-size: 1.2rem; opacity: .95; max-width: 640px; margin: 0 auto 26px; }
+        h2 { font-size: 1.7rem; letter-spacing: -.3px; margin-bottom: 22px; }
+        h2.on-dark { color: #fff; }
+        p.lead { font-size: 1.05rem; margin-bottom: 22px; color: #4a4a5c; }
+        code, pre { font-family: 'SF Mono', 'Cascadia Code', Consolas, 'Liberation Mono', monospace; }
+        .cmd { display: inline-block; max-width: 100%; background: rgba(0,0,0,.28); color: #fff; padding: 12px 20px; border-radius: 10px; font-size: .98rem; word-break: break-all; text-align: left; }
+        pre.term { background: #0d1117; color: #d7dee7; border-radius: 12px; padding: 20px 22px; overflow-x: auto; font-size: .9rem; line-height: 1.55; border: 1px solid #232b36; text-align: left; }
+        .term .p { color: #7ee787; }         /* prompt */
+        .term .u { color: #79c0ff; }         /* url */
+        .term .d { color: #8b949e; }         /* dim */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+        .card { background: #fff; border: 1px solid #e6e6f0; border-radius: 16px; padding: 24px; }
+        .bg-dark .card { background: #161b22; border-color: #232b36; }
+        .card h3 { font-size: 1.12rem; margin-bottom: 8px; color: inherit; }
+        .card .n { display: inline-block; width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg,#667eea,#764ba2); color:#fff; text-align:center; line-height:26px; font-weight:700; font-size:.85rem; margin-right:8px; }
+        .card p { font-size: .96rem; color: #9aa4b2; }
+        .bg-light .card p { color: #5b5b6b; }
+        .warn { background: #fff8e6; border: 1px solid #ffe08a; border-left: 5px solid #f0a500; border-radius: 12px; padding: 22px 24px; margin-top: 8px; }
+        .warn h3 { color: #7a5200; margin-bottom: 8px; }
+        .warn p { color: #5c4a1a; font-size: .98rem; }
+        table.usage { width: 100%; border-collapse: collapse; font-size: .95rem; }
+        table.usage td { padding: 10px 12px; border-bottom: 1px solid #e6e6f0; vertical-align: top; }
+        table.usage td:first-child { white-space: nowrap; }
+        table.usage code { background: #eef0fb; color: #4b3a86; padding: 2px 8px; border-radius: 6px; }
+        .foot { text-align: center; color: #8a8a9a; font-size: .92rem; }
+        .foot a { color: #6a4fd0; text-decoration: none; }
+        .btnrow { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
+        .btn { background: #fff; color: #4b3a86; padding: 12px 22px; border-radius: 10px; font-weight: 600; text-decoration: none; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+        .btn.ghost { background: rgba(255,255,255,.15); color: #fff; box-shadow: none; border: 1px solid rgba(255,255,255,.35); }
+        @media (max-width: 680px) { .section { padding: 40px 26px; } h1 { font-size: 2.1rem; } .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <section class="section bg-hero">
+        <img class="icon" src="images/servewise-icon.png" alt="servewise icon">
+        <h1>servewise</h1>
+        <p class="tag">A safe local preview server for built static sites — Hugo, Sphinx, Jekyll, MkDocs, plain HTML. It's <code>python&nbsp;-m&nbsp;http.server</code> with the four things that bite you during a real preview fixed.</p>
+        <div class="cmd">pip install https://github.com/abdelhaleemahmed/servewise/releases/download/v1.1.0/servewise-1.1.0-py3-none-any.whl</div>
+        <div class="btnrow" style="margin-top:22px;">
+            <a class="btn" href="https://github.com/abdelhaleemahmed/servewise">View on GitHub</a>
+            <a class="btn ghost" href="#why">Why it exists</a>
+        </div>
+    </section>
+
+    <section class="section bg-dark">
+        <pre class="term"><span class="p">$</span> servewise
+serve.py 1.1.0   /path/to/site/serve.py
+Serving /path/to/site
+  <span class="u">http://127.0.0.1:8000/</span>    <span class="d">(cache disabled)</span></pre>
+        <p style="color:#8b949e; font-size:.95rem; margin-top:16px; text-align:center;">One file, no dependencies. Prints exactly what it serves and where.</p>
+    </section>
+
+    <section class="section bg-light" id="why">
+        <h2>Four things <code>http.server</code> doesn't do</h2>
+        <div class="grid">
+            <div class="card">
+                <h3><span class="n">1</span>Caching disabled</h3>
+                <p>Every response sends <code>Cache-Control: no-store</code>, so an edited stylesheet or script shows on an ordinary reload — no more "is it cached or broken?"</p>
+            </div>
+            <div class="card">
+                <h3><span class="n">2</span>First free port from 8000</h3>
+                <p>No "address already in use", and — crucially — no two servers silently sharing a port. The chosen port is printed.</p>
+            </div>
+            <div class="card">
+                <h3><span class="n">3</span>It says who it is</h3>
+                <p>Each instance answers <code>GET /__serve_info</code> with its version, file path, hash, root, and pid — so one copy can ask another what it is.</p>
+            </div>
+            <div class="card">
+                <h3><span class="n">4</span>It checks its own version</h3>
+                <p>At startup and on <code>--check</code>, it compares itself by version <em>and</em> content hash against the canonical copy and every running instance, flagging drift.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>The bug that made port safety non-negotiable</h2>
+        <p class="lead">The obvious way to pick a port is "try to bind, catch the failure, try the next." On Windows there is no failure to catch.</p>
+        <div class="warn">
+            <h3>Two servers, one port, wrong site — silently</h3>
+            <p>Windows honours <code>SO_REUSEADDR</code>, so a second process can bind a port that is already being listened on. It happened here: two servers both bound to 8000, and a request returned <code>200</code> with the right <code>no-store</code> header — while serving <strong>the wrong site</strong>. Nothing failed, nothing logged. Only comparing the response body caught it.</p>
+        </div>
+        <p class="lead" style="margin-top:22px;">So servewise probes the port with an <strong>outbound connection</strong> before binding — the same behaviour on every platform. A socket in <code>TIME_WAIT</code> refuses the probe, so an immediate restart still works.</p>
+    </section>
+
+    <section class="section bg-light">
+        <h2>Usage</h2>
+        <table class="usage">
+            <tr><td><code>servewise</code></td><td>First free port from 8000; serves the nearest built site (walks up to the closest <code>index.html</code>).</td></tr>
+            <tr><td><code>servewise 8010</code></td><td>Start the port search at 8010.</td></tr>
+            <tr><td><code>servewise --strict 8010</code></td><td>Use exactly 8010, or fail — don't wander to another port.</td></tr>
+            <tr><td><code>servewise --root DIR</code></td><td>Serve some other directory.</td></tr>
+            <tr><td><code>servewise --check</code></td><td>Audit versions across copies and running instances, then exit.</td></tr>
+            <tr><td><code>python -m servewise</code></td><td>Same as the <code>servewise</code> command; the single file runs as <code>python server.py</code>.</td></tr>
+        </table>
+        <p class="lead" style="margin-top:22px;">Requires Python 3.8+ and nothing else — it is standard library only.</p>
+    </section>
+
+    <section class="section foot">
+        <p><strong>servewise</strong> — MIT licensed. Built by Ahmed Abdelhaleem.</p>
+        <p style="margin-top:6px;"><a href="https://github.com/abdelhaleemahmed/servewise">GitHub</a> &nbsp;·&nbsp; <a href="https://github.com/abdelhaleemahmed/servewise#readme">Install</a> &nbsp;·&nbsp; MIT</p>
+    </section>
+
+</div>
+</body>
+</html>

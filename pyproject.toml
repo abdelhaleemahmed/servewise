@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "servewise"
+version = "1.1.0"
+description = "A safe local preview server for built static sites: caching disabled, first-free-port selection, and version self-checking."
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+authors = [
+    {name = "Ahmed Abdelhaleem Ahmed", email = "ahmedd.haleem@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Utilities",
+]
+keywords = ["http-server", "preview", "static-site", "hugo", "sphinx", "no-cache", "dev-server"]
+dependencies = []          # standard library only
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "build", "twine"]
+
+[project.urls]
+Homepage = "https://abdelhaleemahmed.github.io/servewise/"
+Repository = "https://github.com/abdelhaleemahmed/servewise"
+
+[project.scripts]
+servewise = "servewise.server:main"
+
+[tool.setuptools]
+packages = ["servewise"]
